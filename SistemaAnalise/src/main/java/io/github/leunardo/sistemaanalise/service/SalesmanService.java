@@ -69,6 +69,6 @@ public class SalesmanService {
                 .stream()
                 .filter(s -> s.getName().equals(worstSalesmanWithSales.getKey()))
                 .findFirst()
-                .get();
+                .orElse(null);
     }
 }

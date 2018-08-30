@@ -43,7 +43,7 @@ public class FileService {
                     .collect(Collectors.toCollection(ArrayList::new));
             return data;
         } catch (IOException exception) {
-            
+            System.out.println("An error ocurred while reading a file.");
         }
         
         return null;

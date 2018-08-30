@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
+import java.util.function.Supplier;
 
 /**
  *
@@ -48,19 +49,40 @@ public class FileService {
         return null;
     }
     
-    public static void writeFile(String filepath, ArrayList<IData> data) {
+    public static void writeFile(String filepath, ArrayList<IData> data) throws IOException {
         Path file = Paths.get(filepath);
-        Stream<IData> dataStream = data.stream();
+ 
         
-        long numberOfClients = dataStream.filter(d -> d instanceof ClientModel).count();
-        long numberOfSalesmen = dataStream.filter(d -> d instanceof SalesmanModel).count();
-        Stream<SalesModel> sales = dataStream
+       String dataToWrite = getDataParsedToWrite(data);
+       
+       Files.write(file, dataToWrite.getBytes());
+    }
+    
+    private static String getDataParsedToWrite (ArrayList<IData> data) {
+        StringBuilder sb = new StringBuilder();
+        long numberOfClients = data.stream().filter(d -> d instanceof ClientModel).count();
+        
+        ArrayList<SalesmanModel> salesmen = data.stream()
+                .filter(d -> d instanceof SalesmanModel)
+                .map(d -> (SalesmanModel) d)
+                .collect(Collectors.toCollection(ArrayList::new));
+        
+        long numberOfSalesmen = salesmen.size();
+        
+        Supplier<Stream<SalesModel>> salesStream = () -> data.stream()
                 .filter(d -> d instanceof SalesModel)
                 .map(d -> (SalesModel) d);
         
-        SalesModel mostExpensiveSale = sales.max(SalesService::compareSales);
-   
+        SalesModel mostExpensiveSale = salesStream.get().max(SalesService::compareSales).get();
        
+        SalesmanModel worstSalesman = SalesmanService.getWorstSalesman(salesStream.get(), salesmen);
+                
+        sb.append("Number of clients: ").append(numberOfClients).append("\n");
+        sb.append("Number of salesmen: ").append(numberOfSalesmen).append("\n");
+        sb.append("Most expensive sale ID: ").append(mostExpensiveSale.getSaleId()).append("\n");
+        sb.append("Worst salesman: ").append(worstSalesman).append("\n");
+        
+        return sb.toString();
     }
         
 

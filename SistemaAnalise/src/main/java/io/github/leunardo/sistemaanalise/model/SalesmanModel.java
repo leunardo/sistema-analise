@@ -31,4 +31,10 @@ public class SalesmanModel implements IData {
     public double getSalary() {
         return salary;
     }
+    
+    
+    @Override
+    public String toString() {
+        return getName() + " - CPF: " + getCpf() + " - Salary: " + getSalary();
+    }
 }
